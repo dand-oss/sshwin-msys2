@@ -231,12 +231,22 @@ std::string socketServer::initMsys2Socket()
 	{
 		ERROREXIT(("Create " + sc.socketFile + " Failed!!\nProgram Exit.").c_str(), 1);
 	}
+	// Generate 4 random uint32 values for Cygwin socket format
+	// Cygwin expects: XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX (4 x 32-bit)
+	// NOT Windows GUID format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+	uint32_t secret[4];
 	GUID _guid;
 	if (S_OK == CoCreateGuid(&_guid))
 	{
+		// Use GUID bytes to populate 4 uint32 values
+		secret[0] = _guid.Data1;
+		secret[1] = ((uint32_t)_guid.Data2 << 16) | (uint32_t)_guid.Data3;
+		memcpy(&secret[2], &_guid.Data4[0], 4);
+		memcpy(&secret[3], &_guid.Data4[4], 4);
+
 		char buff[40] = { 0 };
-		snprintf(buff, 36, "%08X-%04X%04X-%02X%02X%02X%02X-%02X%02X%02X%02X",
-			_guid.Data1, _guid.Data2, _guid.Data3, _guid.Data4[0], _guid.Data4[1], _guid.Data4[2], _guid.Data4[3], _guid.Data4[4], _guid.Data4[5], _guid.Data4[6], _guid.Data4[7]);
+		snprintf(buff, 36, "%08X-%08X-%08X-%08X",
+			secret[0], secret[1], secret[2], secret[3]);
 		char out[61] = { 0 };
 		snprintf(out, 60, "!<socket >%s s %s", sc.port.c_str(), buff);
 		output.write(out, strlen(out) + 1);

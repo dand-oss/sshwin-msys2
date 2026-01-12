@@ -35,7 +35,13 @@ int main(int argc, char* argv[])
 {
 
 	std::string port = "61000";
-	std::string socketFile = "C:\\MSYS64\\tmp\\sshwin-msys2.sock";
+	std::string socketFile;
+	const char* tmpdir = std::getenv("TMPDIR");
+	if (tmpdir && tmpdir[0] != '\0') {
+		socketFile = std::string(tmpdir) + "\\sshwin-msys2.sock";
+	} else {
+		socketFile = "C:\\MSYS64\\tmp\\sshwin-msys2.sock";  // fallback
+	}
 	std::string pipeName = "openssh-ssh-agent";
 	std::string hostIP = "127.0.0.1";
 	int timeout = 60000;  //60s conn timeout
