@@ -1,0 +1,20 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+if(NOT TARGET sshwin::sshwin-msys2)
+    include("${CMAKE_CURRENT_LIST_DIR}/sshwinTargets.cmake")
+endif()
+
+if(TARGET sshwin::sshwin-msys2)
+    get_target_property(SSHWIN_EXECUTABLE sshwin::sshwin-msys2 IMPORTED_LOCATION)
+    if(NOT SSHWIN_EXECUTABLE)
+        get_target_property(SSHWIN_EXECUTABLE sshwin::sshwin-msys2 IMPORTED_LOCATION_RELEASE)
+        if(NOT SSHWIN_EXECUTABLE)
+            get_target_property(SSHWIN_EXECUTABLE sshwin::sshwin-msys2 IMPORTED_LOCATION_DEBUG)
+        endif()
+    endif()
+endif()
+
+set(SSHWIN_FOUND TRUE)
+check_required_components(@PROJECT_NAME@)
